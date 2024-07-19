@@ -18,3 +18,5 @@ $app->get('/', function ($request, $response) {
     $params = [];
     return $this->get('renderer')->render($response, 'index.html', $params);
 });
+
+$app->run();
