@@ -31,6 +31,3 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
-
-    - name: Starting integrated server
-      run: make start
