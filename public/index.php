@@ -37,6 +37,12 @@ $app->add(\Slim\Middleware\MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 
 $router = $app->getRouteCollector()->getRouteParser();
+$app->get('/createTables', function ($request, $response) {
+    $tableCreator = new CreatorTables($this->get('connection'));
+    $tables = $tableCreator->createTables();
+    $tablesCheck = $tableCreator->createTablesChecks();
+    return $response;
+});
 
 $app->get('/', function ($request, $response) {
     $params = [];
@@ -60,10 +66,13 @@ $app->get('/urls/{id}', function ($request, $response, $args) use ($router) {
 
    $database = new PgsqlActions($this->get('connection'));
    $urlFromDb = $database->query('SELECT * FROM urls WHERE id = :id', $args);
+   $checkedUrlFromDb = $database->query('SELECT * FROM url_checks 
+                                                WHERE url_id = :id ORDER BY id DESC', $args);
    $params = ['id' => $urlFromDb[0]['id'],
                 'name' => $urlFromDb[0]['name'],
                 'created_at' => $urlFromDb[0]['created_at'],
-                'flash' => $messages
+                'flash' => $messages,
+                'urls' => $checkedUrlFromDb
        ];
    return $this->get('renderer')->render($response, 'urlsId.phtml', $params);
 })->setName('urlsId');
@@ -76,6 +85,7 @@ $app->post('/urls', function ($request, $response) use ($router) {
     try {
         $tableCreator = new CreatorTables($this->get('connection'));
         $tables = $tableCreator->createTables();
+        $tablesCheck = $tableCreator->createTablesChecks();
     } catch (\PDOException $e) {
         echo $e->getMessage();
     }
@@ -111,6 +121,19 @@ $app->post('/urls', function ($request, $response) use ($router) {
     }
     $params = ['errors' => $error];
     return $this->get('renderer')->render($response->withStatus(422), 'index.phtml', $params);
+});
+
+$app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router) {
+    $checkedUrl['id'] = $args['url_id'];
+    $checkedUrl['time'] = Carbon::now();
+    $database = new PgsqlActions($this->get('connection'));
+    $error = [];
+
+    $insertInTable = $database->query('INSERT INTO url_checks (url_id, created_at)
+                                            VALUES (:id, :time)', $checkedUrl);
+
+    $url = $router->urlFor('urlsId', ['id' => $checkedUrl['id']]);
+    return $response->withRedirect($url, 302);
 });
 
 $app->run();
