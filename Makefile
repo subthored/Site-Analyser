@@ -7,3 +7,6 @@ install:
 
 lint:
 	composer exec --verbose phpcs -- --standard=PSR12 app public src
+
+create:
+	./bin/create_tables

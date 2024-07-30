@@ -14,4 +14,6 @@ COPY . .
 
 RUN composer install
 
-CMD ["bash", "-c", "make start"]
+CMD ["bash", "-c", "export DATABASE_URL=postgresql://user:W2iAXYlW7n3DeO7oV10MwOQ91odmuhES@dpg-cqk8bpiju9rs738i8t4g-a.oregon-postgres.render.com/php_project_9"]
+CMD ["bash", "-c", "psql -a -d $DATABASE_URL -f database.sql"]
+CMD ["bash", "-c", "make create", "make start"]
