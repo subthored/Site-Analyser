@@ -9,6 +9,10 @@ use PostgreSQL\Connection;
 use Slim\Factory\AppFactory;
 use Valitron\Validator;
 use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ConnectException;
+use DiDom\Document;
 
 try {
     Connection::get()->connect();
@@ -82,14 +86,6 @@ $app->post('/urls', function ($request, $response) use ($router) {
     $database = new PgsqlActions($this->get('connection'));
     $error = [];
 
-    try {
-        $tableCreator = new CreatorTables($this->get('connection'));
-        $tables = $tableCreator->createTables();
-        $tablesCheck = $tableCreator->createTablesChecks();
-    } catch (\PDOException $e) {
-        echo $e->getMessage();
-    }
-
     $validator = new Validator(array('name' => $url['name'], 'count' => strlen($url['name'])));
     $validator->rule('required', 'name')
         ->rule('lengthMax', 'count.', 255)
@@ -124,16 +120,75 @@ $app->post('/urls', function ($request, $response) use ($router) {
 });
 
 $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($router) {
-    $checkedUrl['id'] = $args['url_id'];
-    $checkedUrl['time'] = Carbon::now();
+    $checkedUrl['url_id'] = $args['url_id'];
     $database = new PgsqlActions($this->get('connection'));
+    $urlForTest = $database->query('SELECT name FROM urls WHERE id = :url_id', $checkedUrl);
     $error = [];
 
-    $insertInTable = $database->query('INSERT INTO url_checks (url_id, created_at)
-                                            VALUES (:id, :time)', $checkedUrl);
+    try {
+        $client = new Client();
+        $testResponse = $client->request('GET', $urlForTest[0]['name']);
+        $checkedUrl['status'] = $testResponse->getStatusCode();
+    } catch (ConnectException $e) {
+        $this->get('flash')->addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
+        $url = $router->urlFor('urlsId', ['id' => $checkedUrl['url_id']]);
+        return $response->withRedirect($url);
+    } catch (ClientException $e) {
+        if ($e->getResponse()->getStatusCode() != 200) {
+            $checkedUrl['status'] = $e->getResponse()->getStatusCode();
+            $checkedUrl['title'] = 'Доступ ограничен проблема с IP';
+            $checkedUrl['h1'] = 'Доступ ограничен проблема с IP';
+            $checkedUrl['meta'] = 'Доступ ограничен проблема с IP';
+            $checkedUrl['time'] = Carbon::now();
+            $database->query('INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at)
+                                    VALUES (:url_id, :status, :title, :h1, :meta, :time)', $checkedUrl);
+            $this->get('flash')->addMessage('warning', 'Проверка была выполнена успешно, но сервер ответил с ошибкой');
+            $url = $router->urlFor('urlsId', ['id' => $checkedUrl['url_id']]);
+            return $response->withRedirect($url);
+        }
+    }
 
-    $url = $router->urlFor('urlsId', ['id' => $checkedUrl['id']]);
+    $client = new Client();
+    $testResponse = $client->request('GET', $urlForTest[0]['name']);
+    $parsedHtml = new Document($testResponse->getBody()->getContents(), false);
+    $title = $parsedHtml->first('title');
+    $h1 = $parsedHtml->first('h1');
+    $meta = $parsedHtml->first('meta[name="description"]');
+    $checkedUrl['time'] = Carbon::now();
+
+    if ($title?->text()) {
+        $title = mb_substr($title->text(), 0, 255);
+        $checkedUrl['title'] = $title;
+    } else {
+        $checkedUrl['title'] = '';
+    }
+
+    if ($h1?->text()) {
+        $h1 = mb_substr($h1->text(), 0, 255);
+        $checkedUrl['h1'] = $h1;
+    } else {
+        $checkedUrl['h1'] = '';
+    }
+
+    if ($meta?->getAttribute('content')) {
+        $meta = mb_substr($meta->getAttribute('content'), 0, 255);
+        $checkedUrl['meta'] = $meta;
+    } else {
+        $checkedUrl['meta'] = '';
+    }
+
+    if (isset($checkedUrl['status'])) {
+        try {
+            $insertInTable = $database->query('INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at)
+                                            VALUES (:url_id, :status, :title, :h1, :meta, :time)', $checkedUrl);
+        } catch (\PDOException $e) {
+            echo $e->getMessage();
+        }
+        $this->get('flash')->addMessage('success', 'Страница успешно проверена');
+    }
+
+    $url = $router->urlFor('urlsId', ['id' => $checkedUrl['url_id']]);
     return $response->withRedirect($url, 302);
-});
+})->setName('urlsChecks');
 
 $app->run();
