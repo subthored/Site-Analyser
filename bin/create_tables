@@ -1,0 +1,10 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/../vendor/autoload.php';
+
+use Hexlet\Code\CreatorTables;
+
+$tableCreator = new CreatorTables($this->get('connection'));
+$tables = $tableCreator->createTables();
+$tablesCheck = $tableCreator->createTablesChecks();
