@@ -3,7 +3,6 @@
 require __DIR__ . '/../vendor/autoload.php';
 
 use DI\Container;
-use Hexlet\Code\CreatorTables;
 use Hexlet\Code\PgsqlActions;
 use PostgreSQL\Connection;
 use Slim\Factory\AppFactory;
@@ -41,12 +40,6 @@ $app->add(\Slim\Middleware\MethodOverrideMiddleware::class);
 $app->addErrorMiddleware(true, true, true);
 
 $router = $app->getRouteCollector()->getRouteParser();
-$app->get('/createTables', function ($request, $response) {
-    $tableCreator = new CreatorTables($this->get('connection'));
-    $tables = $tableCreator->createTables();
-    $tablesCheck = $tableCreator->createTablesChecks();
-    return $response;
-});
 
 $app->get('/', function ($request, $response) {
     $params = [];

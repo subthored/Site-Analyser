@@ -39,7 +39,6 @@ class Connection
 
         return $pdo;
     }
-
     public static function get()
     {
         if (null === static::$conn) {
