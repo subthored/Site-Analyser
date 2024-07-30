@@ -12,6 +12,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use DiDom\Document;
+use Hexlet\Code\CreatorTables;
 
 try {
     Connection::get()->connect();
@@ -19,6 +20,10 @@ try {
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
+
+$tableCreator = new CreatorTables($this->get('connection'));
+$tables = $tableCreator->createTables();
+$tablesCheck = $tableCreator->createTablesChecks();
 
 session_start();
 
