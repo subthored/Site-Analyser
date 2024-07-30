@@ -65,20 +65,20 @@ $app->get('/urls', function ($request, $response) use ($router) {
 })->setName('urls');
 
 $app->get('/urls/{id}', function ($request, $response, $args) use ($router) {
-   $id =  $args['id'];
-   $messages = $this->get('flash')->getMessages;
+    $id =  $args['id'];
+    $messages = $this->get('flash')->getMessages;
 
-   $database = new PgsqlActions($this->get('connection'));
-   $urlFromDb = $database->query('SELECT * FROM urls WHERE id = :id', $args);
-   $checkedUrlFromDb = $database->query('SELECT * FROM url_checks 
+    $database = new PgsqlActions($this->get('connection'));
+    $urlFromDb = $database->query('SELECT * FROM urls WHERE id = :id', $args);
+    $checkedUrlFromDb = $database->query('SELECT * FROM url_checks 
                                                 WHERE url_id = :id ORDER BY id DESC', $args);
-   $params = ['id' => $urlFromDb[0]['id'],
+    $params = ['id' => $urlFromDb[0]['id'],
                 'name' => $urlFromDb[0]['name'],
                 'created_at' => $urlFromDb[0]['created_at'],
                 'flash' => $messages,
                 'urls' => $checkedUrlFromDb
-       ];
-   return $this->get('renderer')->render($response, 'urlsId.phtml', $params);
+        ];
+    return $this->get('renderer')->render($response, 'urlsId.phtml', $params);
 })->setName('urlsId');
 
 $app->post('/urls', function ($request, $response) use ($router) {
@@ -179,7 +179,8 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
 
     if (isset($checkedUrl['status'])) {
         try {
-            $insertInTable = $database->query('INSERT INTO url_checks (url_id, status_code, title, h1, description, created_at)
+            $insertInTable = $database->query('INSERT INTO url_checks (url_id, status_code, title, h1, 
+                                            description, created_at)
                                             VALUES (:url_id, :status, :title, :h1, :meta, :time)', $checkedUrl);
         } catch (\PDOException $e) {
             echo $e->getMessage();
