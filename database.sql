@@ -1,4 +1,4 @@
-TRUNCATE urls_checks;
+TRUNCATE url_checks;
 TRUNCATE urls CASCADE;
 
 CREATE TABLE IF NOT EXISTS urls
