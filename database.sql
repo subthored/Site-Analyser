@@ -1,5 +1,5 @@
-TRUNCATE url_checks;
-TRUNCATE urls CASCADE;
+-- TRUNCATE url_checks;
+-- TRUNCATE urls CASCADE;
 
 CREATE TABLE IF NOT EXISTS urls
 (
