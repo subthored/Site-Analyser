@@ -17,13 +17,6 @@ use Hexlet\Code\CreatorTables;
 
 session_start();
 
-try {
-    Connection::get()->connect();
-    echo 'A connection to PostgreSQL database server has been establish successfully.';
-} catch (\PDOException $e) {
-    echo $e->getMessage();
-}
-
 $container = new Container();
 $container->set('renderer', function () {
     return new \Slim\Views\PhpRenderer(__DIR__ . '/../templates');
@@ -63,8 +56,7 @@ $app->get('/urls', function ($request, $response) use ($router) {
 })->setName('urls');
 
 $app->get('/urls/{id}', function ($request, $response, $args) use ($router) {
-    $id =  $args['id'];
-    $messages = $this->get('flash')->getMessages;
+    $messages = $this->get('flash')->getMessages();
 
     $database = new PgsqlActions($this->get('connection'));
     $urlFromDb = $database->query('SELECT * FROM urls WHERE id = :id', $args);
@@ -103,8 +95,9 @@ $app->post('/urls', function ($request, $response) use ($router) {
         $url['time'] = Carbon::now();
         $insertUrlInTable = $database->query('INSERT INTO urls (name, created_at) VALUES (:name, :time)', $url);
         $this->get('flash')->addMessage('success', 'Страница успешно добавлена');
+        $id = $database->query('SELECT MAX(id) FROM urls');
 
-        $redirectUrl = $router->urlFor('urlsId', ['id' => $nameInDb[0]['id']]);
+        $redirectUrl = $router->urlFor('urlsId', ['id' => $id[0]['max']]);
         return $response->withRedirect($redirectUrl);
     } else {
         if (isset($url) && strlen($url['name']) < 1) {
