@@ -121,7 +121,8 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
         $testResponse = $client->request('GET', $urlForTest[0]['name']);
         $checkedUrl['status'] = $testResponse->getStatusCode();
     } catch (ConnectException $e) {
-        $messages = $this->get('flash')->addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
+        $messages = $this->get('flash')->
+                    addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
         $url = $router->urlFor('urlsId', ['id' => $checkedUrl['url_id']]);
         return $response->withRedirect($url);
     } catch (ClientException $e) {
