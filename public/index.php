@@ -15,14 +15,14 @@ use GuzzleHttp\Exception\ConnectException;
 use DiDom\Document;
 use Hexlet\Code\CreatorTables;
 
+session_start();
+
 try {
     Connection::get()->connect();
     echo 'A connection to PostgreSQL database server has been establish successfully.';
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
-
-session_start();
 
 $container = new Container();
 $container->set('renderer', function () {

@@ -10,6 +10,7 @@ class Connection
     {
         if (getenv('DATABASE_URL')) {
             $databaseUrl = parse_url(getenv('DATABASE_URL'));
+            var_dump($databaseUrl);
         }
 
         if (isset($databaseUrl['host'])) {
