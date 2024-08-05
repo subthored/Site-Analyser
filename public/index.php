@@ -6,6 +6,7 @@ use DI\Container;
 use Hexlet\Code\PgsqlActions;
 use PostgreSQL\Connection;
 use Slim\Factory\AppFactory;
+use Slim\Flash\Messages;
 use Valitron\Validator;
 use Carbon\Carbon;
 use GuzzleHttp\Client;
@@ -20,10 +21,6 @@ try {
 } catch (\PDOException $e) {
     echo $e->getMessage();
 }
-
-$tableCreator = new CreatorTables($this->get('connection'));
-$tables = $tableCreator->createTables();
-$tablesCheck = $tableCreator->createTablesChecks();
 
 session_start();
 
@@ -47,6 +44,9 @@ $app->addErrorMiddleware(true, true, true);
 $router = $app->getRouteCollector()->getRouteParser();
 
 $app->get('/', function ($request, $response) {
+    $tableCreator = new CreatorTables($this->get('connection'));
+    $tables = $tableCreator->createTables();
+    $tablesCheck = $tableCreator->createTablesChecks();
     $params = [];
     return $this->get('renderer')->render($response, 'index.phtml', $params);
 })->setName('mainPage');
@@ -128,7 +128,7 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
         $testResponse = $client->request('GET', $urlForTest[0]['name']);
         $checkedUrl['status'] = $testResponse->getStatusCode();
     } catch (ConnectException $e) {
-        $this->get('flash')->addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
+        $messages = $this->get('flash')->addMessage('failure', 'Произошла ошибка при проверке, не удалось подключиться');
         $url = $router->urlFor('urlsId', ['id' => $checkedUrl['url_id']]);
         return $response->withRedirect($url);
     } catch (ClientException $e) {
