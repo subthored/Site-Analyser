@@ -16,7 +16,7 @@ class Connection
         if (isset($databaseUrl['host'])) {
             $params['host'] = $databaseUrl['host'];
             $params['port'] = $databaseUrl['port'] ?? null;
-            $params['database'] = $databaseUrl['path'] ?? null;
+            $params['database'] = $databaseUrl['scheme'] ?? null;
             $params['user'] = $databaseUrl['user'] ?? null;
             $params['password'] = $databaseUrl['pass'] ?? null;
         } else {
