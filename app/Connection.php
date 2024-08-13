@@ -10,7 +10,6 @@ class Connection
     {
         if (getenv('DATABASE_URL')) {
             $databaseUrl = parse_url(getenv('DATABASE_URL'));
-            var_dump($databaseUrl);
         }
 
         if (isset($databaseUrl['host'])) {
@@ -25,7 +24,6 @@ class Connection
         if ($params === false) {
             throw new \Exception("Error reading database configuration file");
         }
-        var_dump($params);
 
         $conStr = sprintf(
             "pgsql:host=%s;port=%d;dbname=%s;user=%s;password=%s",
@@ -35,7 +33,6 @@ class Connection
             $params['user'],
             $params['password']
         );
-        var_dump($conStr);
 
         $pdo = new \PDO($conStr);
         $pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
