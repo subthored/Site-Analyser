@@ -149,22 +149,22 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $h1 = ($parsedHtml->first('h1'));
     $meta = ($parsedHtml->first('meta[name="description"]'));
     $checkedUrl['time'] = Carbon::now();
-    
-    if ($title->text()) {
+
+    if ($title?->text()) {
         $title = mb_substr($title->text(), 0, 255);
         $checkedUrl['title'] = $title;
     } else {
         $checkedUrl['title'] = '';
     }
 
-    if ($h1->text()) {
+    if ($h1?->text()) {
         $h1 = mb_substr($h1->text(), 0, 255);
         $checkedUrl['h1'] = $h1;
     } else {
         $checkedUrl['h1'] = '';
     }
 
-    if ($meta->getAttribute('content')) {
+    if ($meta?->getAttribute('content')) {
         $meta = mb_substr($meta->getAttribute('content'), 0, 255);
         $checkedUrl['meta'] = $meta;
     } else {

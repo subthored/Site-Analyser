@@ -4,6 +4,9 @@ namespace Hexlet\Code;
 
 class CreatorTables
 {
+    /**
+     * @var \PDO
+     */
     private $pdo;
 
     public function __construct($pdo)
