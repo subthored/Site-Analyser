@@ -145,8 +145,11 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $client = new Client();
     $testResponse = $client->request('GET', $urlForTest[0]['name']);
     $parsedHtml = new Document($testResponse->getBody()->getContents(), false);
+    /** @var Document $title */
     $title = ($parsedHtml->first('title'));
+    /** @var Document $h1 */
     $h1 = ($parsedHtml->first('h1'));
+    /** @var Document $meta */
     $meta = ($parsedHtml->first('meta[name="description"]'));
     $checkedUrl['time'] = Carbon::now();
 
