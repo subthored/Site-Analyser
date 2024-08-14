@@ -13,6 +13,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\ConnectException;
 use DiDom\Document;
+use DiDom\Element;
 use Hexlet\Code\CreatorTables;
 
 session_start();
@@ -44,7 +45,7 @@ $app->get('/', function ($request, $response) {
     return $this->get('renderer')->render($response, 'index.phtml', $params);
 })->setName('mainPage');
 
-$app->get('/urls', function ($request, $response) use ($router) {
+$app->get('/urls', function ($request, $response) {
     $dataBase = new PgsqlActions($this->get('connection'));
     $urlsFromDb = $dataBase->query(
         'SELECT MAX(url_checks.created_at) AS created_at, url_checks.status_code, urls.id, urls.name
@@ -57,7 +58,7 @@ $app->get('/urls', function ($request, $response) use ($router) {
     return $this->get('renderer')->render($response, 'urls.phtml', $params);
 })->setName('urls');
 
-$app->get('/urls/{id}', function ($request, $response, $args) use ($router) {
+$app->get('/urls/{id}', function ($request, $response, $args) {
     $messages = $this->get('flash')->getMessages();
 
     $database = new PgsqlActions($this->get('connection'));
