@@ -47,9 +47,11 @@ $app->get('/', function ($request, $response) {
 $app->get('/urls', function ($request, $response) use ($router) {
     $dataBase = new PgsqlActions($this->get('connection'));
     $urlsFromDb = $dataBase->query(
-        'SELECT created_at, id, name
+        'SELECT MAX(url_checks.created_at) AS created_at, url_checks.status_code, urls.id, urls.name
             FROM urls
-            ORDER BY id DESC '
+            LEFT OUTER JOIN url_checks ON url_checks.url_id = urls.id
+            GROUP BY url_checks.url_id, urls.id, url_checks.status_code
+            ORDER BY urls.id DESC'
     );
     $params = ['data' => $urlsFromDb];
     return $this->get('renderer')->render($response, 'urls.phtml', $params);
