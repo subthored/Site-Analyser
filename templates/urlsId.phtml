@@ -46,8 +46,8 @@
     <form action="/urls/<?= htmlspecialchars($id) ?>/checks" class="mb-3" method="post">
         <input type="submit" class="btn btn-primary" value="Запустить проверку">
     </form>
-    <tbody>
-        <table class="table table-hover table-bordered" data-test="checks">
+    <table class="table table-hover table-bordered" data-test="checks">
+        <thead>
             <tr>
                 <th>ID</th>
                 <th>Код ответа</th>
@@ -56,6 +56,8 @@
                 <th>description</th>
                 <th>Дата создания</th>
             </tr>
+        </thead>
+        <tbody>
             <?php foreach ($urls as $item): ?>
                 <tr>
                     <td><?= htmlspecialchars($item['id'])?></td>
@@ -66,8 +68,8 @@
                     <td><?= htmlspecialchars($item['created_at']) ?></td>
                 </tr>
             <?php endforeach ?>
-        </table>
-    </tbody>
+        </tbody>
+    </table>
 </main>
 </body>
 </html>
