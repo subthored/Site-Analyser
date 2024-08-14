@@ -149,18 +149,17 @@ $app->post('/urls/{url_id}/checks', function ($request, $response, $args) use ($
     $title = ($parsedHtml->first('title'));
     /** @var Document $h1 */
     $h1 = ($parsedHtml->first('h1'));
-    /** @var Document $meta */
     $meta = ($parsedHtml->first('meta[name="description"]'));
     $checkedUrl['time'] = Carbon::now();
 
-    if ($title?->text()) {
+    if ($title->text()) {
         $title = mb_substr($title->text(), 0, 255);
         $checkedUrl['title'] = $title;
     } else {
         $checkedUrl['title'] = '';
     }
 
-    if ($h1?->text()) {
+    if ($h1->text()) {
         $h1 = mb_substr($h1->text(), 0, 255);
         $checkedUrl['h1'] = $h1;
     } else {
